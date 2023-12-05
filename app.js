@@ -185,7 +185,7 @@ function addAdmins() {
 //reset db ---------------
 
 // createDataBase();
-createTables();
+// createTables();
 // addAdmins();
 
 // ------------------------
