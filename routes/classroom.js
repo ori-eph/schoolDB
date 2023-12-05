@@ -18,38 +18,23 @@ const con = mysql.createConnection({
   database: "moshSchool",
 });
 
-const adminKeyConst = "123ADMIN";
-
-router.get("/", async function (req, res, next) {
-  const selectSql = `SELECT s.title, a.full_name FROM admin as a JOIN school as s ON a.school_id = s.id; `;
-  con.query(selectSql, function (err, result) {
-    if (err) throw err;
-    res.status(200).send(result);
-  });
-});
-
 router.post("/add", async function (req, res, next) {
-  const adminKey = req.body.key;
-  if (!adminKey || adminKey !== adminKeyConst) {
-    return res.status(401).send("1");
-  }
-
-  const school = req.body.school;
+  const classroom = req.body;
   let tableFields = await fsPromise.readFile(
-    path.join(__dirname, `../entities/school.json`),
+    path.join(__dirname, `../entities/classroom.json`),
     "utf-8"
   );
   tableFields = JSON.parse(tableFields);
 
-  if (!school || !compareObjectsKeys(school, tableFields)) {
+  if (!classroom || !compareObjectsKeys(classroom, tableFields)) {
     return res.status(401).send("3");
   }
 
-  const insertSql = makeInsertStr(school, "school");
+  const insertSql = makeInsertStr(classroom, "classroom");
   con.query(insertSql, function (err, result) {
     if (err) throw err;
     const id = result.insertId;
-    const selectSql = `SELECT * FROM school WHERE id = ${id}`;
+    const selectSql = `SELECT * FROM classroom WHERE id = ${id}`;
     con.query(selectSql, function (err, result) {
       if (err) throw err;
       res.status(200).send(result[0]);

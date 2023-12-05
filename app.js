@@ -7,8 +7,10 @@ const fs = require("fs");
 const fsPromise = require("fs/promises");
 
 const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
 const schoolRouter = require("./routes/school");
+const studentRouter = require("./routes/student");
+const teacherRouter = require("./routes/teacher");
+const classroomRouter = require("./routes/classroom");
 
 const app = express();
 
@@ -19,8 +21,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
 app.use("/school", schoolRouter);
+app.use("/student", studentRouter);
+app.use("/teacher", teacherRouter);
+app.use("/classroom", classroomRouter);
 
 module.exports = app;
 
@@ -48,6 +52,49 @@ function createDataBase() {
   });
 }
 
+// async function createTables() {
+//   try {
+//     let names = await fsPromise.readdir(path.join(__dirname, "/entities"));
+//     for (const fileName of names) {
+//       const table = path.basename(fileName, path.extname(fileName));
+//       const dropSql = `DROP TABLE IF EXISTS ${table}`;
+
+//       con.query(dropSql, async function (err, result) {
+//         if (err) throw err;
+
+//         console.log(`${table} dropped if existed`);
+//         let tableFields = await fsPromise.readFile(
+//           path.join(__dirname, `/entities/${fileName}`),
+//           "utf-8"
+//         );
+
+//         tableFields = JSON.parse(tableFields);
+//         let createSql = `CREATE TABLE ${table} `;
+//         let fieldsStr =
+//           "(" +
+//           Object.entries(tableFields)
+//             .map(([key, value]) => `${key} ${value}`)
+//             .join(", ") +
+//           ")";
+//         createSql += fieldsStr;
+
+//         con.query(createSql, function (err, result) {
+//           if (err) throw err;
+//           console.log("table created");
+//         });
+
+//         // const checkSql = `SELECT * FROM ${table};`;
+//         // con.query(checkSql, function (err, result, fields) {
+//         //   if (err) throw err;
+//         //   console.log(fields);
+//         // });
+//       });
+//     }
+//   } catch (err) {
+//     console.log(err);
+//   }
+// }
+
 async function createTables() {
   try {
     let names = await fsPromise.readdir(path.join(__dirname, "/entities"));
@@ -69,21 +116,31 @@ async function createTables() {
         let fieldsStr =
           "(" +
           Object.entries(tableFields)
+            .filter(([key]) => key !== "keys")
             .map(([key, value]) => `${key} ${value}`)
-            .join(", ") +
-          ")";
+            .join(", ");
+
+        // if (tableFields.keys && tableFields.keys.length > 0) {
+        //   const foreignKeys = tableFields.keys
+        //     .map((keyObj) => {
+        //       return `FOREIGN KEY (${keyObj.key}) REFERENCES ${keyObj.reference}`;
+        //     })
+        //     .join(", ");
+        //   fieldsStr += `, ${foreignKeys}`;
+        // }
+
+        fieldsStr += ")";
         createSql += fieldsStr;
 
         con.query(createSql, function (err, result) {
           if (err) throw err;
-          console.log("table created");
+          console.log("Table created");
+          const checkSql = `SELECT * FROM ${table};`;
+          con.query(checkSql, function (err, result, fields) {
+            if (err) throw err;
+            console.log(fields);
+          });
         });
-
-        // const checkSql = `SELECT * FROM ${table};`;
-        // con.query(checkSql, function (err, result, fields) {
-        //   if (err) throw err;
-        //   console.log(fields);
-        // });
       });
     }
   } catch (err) {
@@ -128,7 +185,7 @@ function addAdmins() {
 //reset db ---------------
 
 // createDataBase();
-// createTables();
+createTables();
 // addAdmins();
 
 // ------------------------

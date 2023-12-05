@@ -2,5 +2,10 @@
   "id": "INT AUTO_INCREMENT PRIMARY KEY",
   "grade": "INT",
   "_index": "INT",
-  "teacher_id": "INT"
+  "teacher_id": "INT",
+  "school_id": "INT",
+  "keys": [
+    { "key": "teacher_id", "reference": "teacher(id)" },
+    { "key": "school_id", "reference": "school(id)" }
+  ]
 }
